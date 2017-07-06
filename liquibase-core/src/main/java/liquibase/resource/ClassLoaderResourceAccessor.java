@@ -104,7 +104,7 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 if (zipAndFile.length > 1) {
                     StringBuilder builder = new StringBuilder();
                     for (int i = 1; i < zipAndFile.length; i++) {
-                        builder.append(zipAndFile[1]);
+                        builder.append(zipAndFile[i]);
                     }
                     targetPath = builder.toString();
                     if (targetPath.startsWith("/")) {
