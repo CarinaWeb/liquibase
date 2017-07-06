@@ -100,33 +100,41 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 // it works for zip files as well as JAR files
                 JarFile zipfile = new JarFile(zipFilePath, false);
 
+                String targetPath = "";
+                if (zipAndFile.length > 1) {
+                    StringBuilder builder = new StringBuilder();
+                    for (int i = 1; i < zipAndFile.length; i++) {
+                        builder.append(zipAndFile[1]);
+                    }
+                    targetPath = builder.toString();
+                    if (targetPath.startsWith("/")) {
+                        targetPath = targetPath.substring(1);
+                    }
+                } else {
+                    targetPath = zipAndFile[0];
+                }
+
                 try {
-                    for (String file : zipAndFile) {
-                        if (file.startsWith("/")) {
-                            file = file.substring(1);
-                        }
+                    Enumeration<JarEntry> entries = zipfile.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
 
-                        Enumeration<JarEntry> entries = zipfile.entries();
-                        while (entries.hasMoreElements()) {
-                            JarEntry entry = entries.nextElement();
+                        if (entry.getName().startsWith(targetPath)) {
 
-                            if (entry.getName().startsWith(file)) {
-
-                                if (!recursive) {
-                                    String pathAsDir = path.endsWith("/")
-                                            ? path
-                                            : path + "/";
-                                    if (!entry.getName().startsWith(pathAsDir)
-                                            || entry.getName().substring(pathAsDir.length()).contains("/")) {
-                                        continue;
-                                    }
+                            if (!recursive) {
+                                String pathAsDir = path.endsWith("/")
+                                        ? path
+                                        : path + "/";
+                                if (!entry.getName().startsWith(pathAsDir)
+                                        || entry.getName().substring(pathAsDir.length()).contains("/")) {
+                                    continue;
                                 }
+                            }
 
-                                if (entry.isDirectory() && includeDirectories) {
-                                    returnSet.add(entry.getName());
-                                } else if (includeFiles) {
-                                    returnSet.add(entry.getName());
-                                }
+                            if (entry.isDirectory() && includeDirectories) {
+                                returnSet.add(entry.getName());
+                            } else if (includeFiles) {
+                                returnSet.add(entry.getName());
                             }
                         }
                     }
