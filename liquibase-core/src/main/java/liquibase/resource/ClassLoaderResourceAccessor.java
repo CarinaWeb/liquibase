@@ -101,26 +101,32 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 JarFile zipfile = new JarFile(zipFilePath, false);
 
                 try {
-                    Enumeration<JarEntry> entries = zipfile.entries();
-                    while (entries.hasMoreElements()) {
-                        JarEntry entry = entries.nextElement();
+                    for (String file : zipAndFile) {
+                        if (file.startsWith("/")) {
+                            file = file.substring(1);
+                        }
 
-                        if (entry.getName().startsWith(path)) {
+                        Enumeration<JarEntry> entries = zipfile.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
 
-                            if (!recursive) {
-                                String pathAsDir = path.endsWith("/")
-                                        ? path
-                                        : path + "/";
-                                if (!entry.getName().startsWith(pathAsDir)
-                                 || entry.getName().substring(pathAsDir.length()).contains("/")) {
-                                    continue;
+                            if (entry.getName().startsWith(file)) {
+
+                                if (!recursive) {
+                                    String pathAsDir = path.endsWith("/")
+                                            ? path
+                                            : path + "/";
+                                    if (!entry.getName().startsWith(pathAsDir)
+                                            || entry.getName().substring(pathAsDir.length()).contains("/")) {
+                                        continue;
+                                    }
                                 }
-                            }
 
-                            if (entry.isDirectory() && includeDirectories) {
-                                returnSet.add(entry.getName());
-                            } else if (includeFiles) {
-                                returnSet.add(entry.getName());
+                                if (entry.isDirectory() && includeDirectories) {
+                                    returnSet.add(entry.getName());
+                                } else if (includeFiles) {
+                                    returnSet.add(entry.getName());
+                                }
                             }
                         }
                     }
